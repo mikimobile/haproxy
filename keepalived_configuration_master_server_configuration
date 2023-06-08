@@ -1,0 +1,51 @@
+# KEEPALIVED PROFILE CONFIGURATION SERVER 1 MASTER
+
+######################
+# GLOBAL DEFINITIONS #
+#                    #
+#     KEEPALIVED     #
+######################
+
+global_defs {
+  enable_script_security
+  script_user root
+}
+
+##############################
+#       DEFINITIONS          #
+#           OF               #
+# KEEPALIVED VRRP SCRIPT     #
+##############################
+
+vrrp_script chk_haproxy {
+  script "/usr/bin/killall -0 haproxy"
+  interval 2
+  weight 2
+  timeout 1
+}
+
+############################
+#       DEFINITIONS        #
+#           OF             #
+# KEEPALIVED VRRP INSTANCE #
+############################
+
+vrrp_instance loadbalancing {
+  interface enp0s1
+  state MASTER
+  virtual_router_id 13
+  priority 102
+  advert_int 5
+  track_script {
+    chk_sftp
+  }
+# SERVER PEERING WITH BACKUP HAPROXY
+  unicast_peer {
+    192.168.142.102
+  }
+  virtual_ipaddress {
+      192.168.142.100
+  }
+  virtual_ipaddress_excluded {
+    }
+}
